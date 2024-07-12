@@ -30,7 +30,7 @@ impl DatabaseSettings {
             .host(&self.host)
             .port(self.port)
             .username(&self.username)
-            .password(&self.password.expose_secret())
+            .password(self.password.expose_secret())
             .ssl_mode(match self.require_ssl {
                 true => PgSslMode::Require,
                 false => PgSslMode::Disable,
