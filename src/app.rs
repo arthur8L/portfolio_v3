@@ -6,7 +6,7 @@ use sqlx::{postgres::PgPoolOptions, PgPool};
 use crate::{
     config::{DatabaseSettings, Settings},
     error::AppError,
-    routes::home::home,
+    routes::{health_check::health_check, home::home},
 };
 
 pub struct Application {
@@ -35,6 +35,7 @@ pub async fn run_server(listener: TcpListener, db_pool: PgPool) -> Result<Server
     let db_conn = web::Data::new(db_pool);
     let server = HttpServer::new(move || {
         App::new()
+            .route("/health_check", web::get().to(health_check))
             .route("/", web::get().to(home))
             .app_data(db_conn.clone())
     })
