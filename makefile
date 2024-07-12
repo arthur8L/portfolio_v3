@@ -14,3 +14,5 @@ usused-dep:
 	cargo +nightly udeps
 set-githook-path:
 	git config core.hooksPath .githooks
+script-db:
+	SKIP_DOCKER=true ./scripts/init_db.sh

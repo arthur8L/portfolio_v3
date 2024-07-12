@@ -10,6 +10,7 @@ use crate::{
 };
 
 pub struct Application {
+    port: u16,
     server: Server,
 }
 
@@ -20,28 +21,32 @@ impl Application {
             config.application.host, config.application.port
         ))
         .map_err(AppError::new)?;
-        println!("{}", listener.local_addr().unwrap());
         let db_pool = get_connection_pool(&config.database);
         Ok(Application {
+            port: listener.local_addr().unwrap().port(),
             server: run_server(listener, db_pool).await.map_err(AppError::new)?,
         })
     }
     pub async fn run_until_stop(self) -> Result<(), std::io::Error> {
         self.server.await
     }
+    pub fn get_port(&self) -> u16 {
+        self.port
+    }
 }
 
 pub async fn run_server(listener: TcpListener, db_pool: PgPool) -> Result<Server, AppError> {
     let db_conn = web::Data::new(db_pool);
-    let server = HttpServer::new(move || {
+    let app = move || {
         App::new()
             .route("/health_check", web::get().to(health_check))
             .route("/", web::get().to(home))
             .app_data(db_conn.clone())
-    })
-    .listen(listener)
-    .map_err(AppError::new)?
-    .run();
+    };
+    let server = HttpServer::new(app)
+        .listen(listener)
+        .map_err(AppError::new)?
+        .run();
     Ok(server)
 }
 
