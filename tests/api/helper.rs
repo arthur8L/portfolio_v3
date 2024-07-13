@@ -1,10 +1,8 @@
 use portfolio_v3::{
     app::Application,
     config::{self, DatabaseSettings},
-    error::AppError,
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
-use tokio::runtime::Handle;
 use uuid::Uuid;
 
 pub struct TestApp {
@@ -14,31 +12,56 @@ pub struct TestApp {
     pub db_config: DatabaseSettings,
 }
 impl TestApp {
-    async fn clean_up_db(&self) -> Result<(), AppError> {
-        PgConnection::connect_with(&self.db_config.without_db())
+    pub async fn clean_up(&self) {
+        // self.pool.close().await;
+        let mut conn = PgConnection::connect_with(&self.db_config.without_db())
             .await
-            .map_err(AppError::new)?
-            .execute(
-                format!(
-                    r#"DROP DATABASE IF EXISTS {};"#,
-                    self.db_config.database_name
-                )
-                .as_str(),
+            .expect("Failed createing pg connection for clean_up ");
+
+        conn.execute(
+            format!(
+                r#"
+                SELECT pg_terminate_backend(pg_stat_activity.pid)
+                FROM pg_stat_activity
+                WHERE pg_stat_activity.datname = '{}'
+                AND pid <> pg_backend_pid()"#,
+                self.db_config.database_name
             )
-            .await
-            .map_err(AppError::new)?;
-        Ok(())
+            .as_str(),
+        )
+        .await
+        .expect("Failed to terminate current connection to test db");
+
+        conn.execute(
+            format!(
+                r#"DROP DATABASE IF EXISTS "{}";"#,
+                self.db_config.database_name
+            )
+            .as_str(),
+        )
+        .await
+        .expect("Failed drop database created for test");
+        println!(
+            "Database with id = {} dropped successfully",
+            self.db_config.database_name
+        );
     }
 }
 
-// impl Drop for TestApp {
-//     fn drop(&mut self) {
-//         let handle = Handle::current();
-//         handle
-//             .block_on(self.clean_up_db())
-//             .expect("Failed to cleanup db");
-//     }
-// }
+impl Drop for TestApp {
+    fn drop(&mut self) {
+        //with sqlx::test we don't need this but keeping it for now
+        std::thread::scope(|s| {
+            s.spawn(|| {
+                let rt = tokio::runtime::Builder::new_multi_thread()
+                    .enable_all()
+                    .build()
+                    .expect("FAiled getting tokio runtime");
+                rt.block_on(self.clean_up());
+            });
+        })
+    }
+}
 
 pub async fn spawn_app() -> TestApp {
     let config = {

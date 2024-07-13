@@ -16,4 +16,5 @@ async fn health_check_passes() {
     //     "Expected status code to be 200, but got = {}",
     //     res.status().as_u16()
     // );
+    // app.clean_up_db().await.unwrap();
 }
