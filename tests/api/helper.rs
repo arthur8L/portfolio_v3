@@ -31,14 +31,14 @@ impl TestApp {
     }
 }
 
-impl Drop for TestApp {
-    fn drop(&mut self) {
-        let handle = Handle::current();
-        handle
-            .block_on(self.clean_up_db())
-            .expect("Failed to cleanup db");
-    }
-}
+// impl Drop for TestApp {
+//     fn drop(&mut self) {
+//         let handle = Handle::current();
+//         handle
+//             .block_on(self.clean_up_db())
+//             .expect("Failed to cleanup db");
+//     }
+// }
 
 pub async fn spawn_app() -> TestApp {
     let config = {
@@ -63,7 +63,7 @@ async fn configure_test_database(config: &DatabaseSettings) -> PgPool {
     PgConnection::connect_with(&config.without_db())
         .await
         .expect("Failed to connect to postgres")
-        .execute(format!(r#"CREATE DATABSE "{}""#, config.database_name).as_str())
+        .execute(format!(r#"CREATE DATABASE "{}""#, config.database_name).as_str())
         .await
         .expect("Failed to send query to create database");
     let pool = PgPool::connect_with(config.with_db())
