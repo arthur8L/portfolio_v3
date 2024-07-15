@@ -1,9 +1,14 @@
+use std::sync::Once;
+
 use portfolio_v3::{
     app::Application,
     config::{self, DatabaseSettings},
+    telemetry::{get_subscriber, init_subscriber},
 };
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
+
+static TRACING: Once = Once::new();
 
 pub struct TestApp {
     pub port: u16,
@@ -11,6 +16,7 @@ pub struct TestApp {
     pub pool: PgPool,
     pub db_config: DatabaseSettings,
 }
+
 impl TestApp {
     async fn clean_up(&self) {
         // self.pool.close().await;
@@ -64,6 +70,14 @@ impl Drop for TestApp {
 }
 
 pub async fn spawn_app() -> TestApp {
+    TRACING.call_once(|| {
+        let (name, env_filter) = ("portfolio_test", "debug");
+        if std::env::var("TEST_LOG").is_ok() {
+            init_subscriber(get_subscriber(name, env_filter, std::io::stdout));
+        } else {
+            init_subscriber(get_subscriber(name, env_filter, std::io::sink));
+        };
+    });
     let config = {
         let mut c = config::get_config().expect("Failed to get config");
         c.database.database_name = Uuid::new_v4().to_string();
