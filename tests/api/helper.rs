@@ -12,7 +12,7 @@ pub struct TestApp {
     pub db_config: DatabaseSettings,
 }
 impl TestApp {
-    pub async fn clean_up(&self) {
+    async fn clean_up(&self) {
         // self.pool.close().await;
         let mut conn = PgConnection::connect_with(&self.db_config.without_db())
             .await
@@ -73,10 +73,12 @@ pub async fn spawn_app() -> TestApp {
     let app = Application::build(config.clone())
         .await
         .expect("Failed to build application");
+    let port = app.get_port();
+    tokio::spawn(app.run_until_stop());
     TestApp {
-        port: app.get_port(),
+        port,
         pool: configure_test_database(&config.database).await,
-        address: format!("http://127.0.0.1:{}", app.get_port()),
+        address: format!("http://127.0.0.1:{}", port),
         db_config: config.database,
     }
 }
