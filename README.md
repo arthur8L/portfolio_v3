@@ -3,7 +3,7 @@
     <h1>Portfolio V3</h1>
   </p>
   <p>
-    Portfolio -> HTMX + Actix
+    Portfolio -> HTMX + Askama + Actix
   </p>
 </div>
 

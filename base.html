@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arthur Lee - {% block title %}{{title}}{#end block}</title>
+    <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    {%block head %}{% endblock %}
+</head>
+<body class="min-h-screen">
+ {% block content %}<p class="h2 p-1 border">Placeholder</p>{ % endblock % }    
+</body>
+</html>
