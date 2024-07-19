@@ -25,3 +25,5 @@ impl Display for AppError {
 }
 
 impl std::error::Error for AppError {}
+
+impl actix_web::ResponseError for AppError {}
