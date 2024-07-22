@@ -8,7 +8,10 @@
         <script src="https://cdn.tailwindcss.com"></script>
         {%block head %}{% endblock %}
     </head>
-    <body class="min-h-screen">
+    <body class="min-h-screen max-w-7xl mx-auto bg-zinc-950 text-zinc-100">
+        <header class="b-white">
+            <nav></nav>
+        </header>
         {% block content %}<p class="h2 p-1 border">Placeholder</p>{% endblock %}
     </body>
 </html>
