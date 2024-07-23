@@ -9,8 +9,14 @@
         {%block head %}{% endblock %}
     </head>
     <body class="min-h-screen max-w-7xl mx-auto bg-zinc-950 text-zinc-100">
-        <header class="b-white">
-            <nav></nav>
+        <header class="border-b border-zinc-100 py-3 px-2">
+            <nav>
+                <ul class="flex flex-row items-end row gap-x-3 justify-end">
+                    <li><a href="/" class="hover:underline">Home</a></li>
+                    <li><a href="/projects" class="hover:underline" >Projects</a></li>
+                    <li><a href="/contact" class="hover:underline">Contact</a></li>
+                </ul>
+            </nav>
         </header>
         {% block content %}<p class="h2 p-1 border">Placeholder</p>{% endblock %}
     </body>
